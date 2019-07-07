@@ -92,6 +92,12 @@ class TasksCron extends \Froxlor\Cron\FroxlorCron
 				 */
 				\Froxlor\FroxlorLogger::getInstanceOf()->logAction(\Froxlor\FroxlorLogger::CRON_ACTION, LOG_NOTICE, "Removing PowerDNS entries for domain " . $row['data']['domain']);
 				\Froxlor\Dns\PowerDNS::cleanDomainZone($row['data']['domain']);
+			} elseif ($row['type'] == '12') {
+				/**
+				 * TYPE=12 domain has been deleted, remove from acme.sh/let's encrypt directory if used
+				 */
+				\Froxlor\FroxlorLogger::getInstanceOf()->logAction(\Froxlor\FroxlorLogger::CRON_ACTION, LOG_NOTICE, "Removing Let's Encrypt entries for domain " . $row['data']['domain']);
+				\Froxlor\Domain\Domain::doLetsEncryptCleanUp($row['data']['domain']);
 			}
 		}
 
@@ -231,8 +237,8 @@ class TasksCron extends \Froxlor\Cron\FroxlorCron
 				Extrausers::generateFiles($extrausers_log);
 			}
 
-			// clear NSCD cache if using fcgid or fpm, #1570
-			if (Settings::Get('system.mod_fcgid') == 1 || (int) Settings::Get('phpfpm.enabled') == 1) {
+			// clear NSCD cache if using fcgid or fpm, #1570 - not needed for nss-extrausers
+			if ((Settings::Get('system.mod_fcgid') == 1 || (int) Settings::Get('phpfpm.enabled') == 1) && Settings::Get('system.nssextrausers') == 0) {
 				$false_val = false;
 				\Froxlor\FileDir::safe_exec('nscd -i passwd 1> /dev/null', $false_val, array(
 					'>'

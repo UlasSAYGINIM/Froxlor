@@ -20,6 +20,19 @@ return array(
 			'title' => \Froxlor\Frontend\UI::getLng('admin.froxlorvhost') . (call_user_func(array('\Froxlor\Settings\FroxlorVhostSettings', 'hasVhostContainerEnabled')) == false ? \Froxlor\Frontend\UI::getLng('admin.novhostcontainer') : ''),
 			'fields' => array(
 				/**
+				 * Webserver-Vhost
+				 */
+				'system_froxloraliases' => array(
+					'label' => \Froxlor\Frontend\UI::getLng('serversettings.froxloraliases'),
+					'settinggroup' => 'system',
+					'varname' => 'froxloraliases',
+					'type' => 'string',
+					'string_regexp' => '/^(([a-z0-9\-\._]+, ?)*[a-z0-9\-\._]+)?$/i',
+					'string_emptyallowed' => true,
+					'default' => '',
+					'save_method' => 'storeSettingField'
+				),
+				/**
 				 * SSL / Let's Encrypt
 				 */
 				'system_le_froxlor_enabled' => array(
@@ -32,7 +45,7 @@ return array(
 					'visible' => \Froxlor\Settings::Get('system.leenabled') && call_user_func(array(
 						'\Froxlor\Settings\FroxlorVhostSettings',
 						'hasVhostContainerEnabled'
-					))
+					), true)
 				),
 				'system_le_froxlor_redirect' => array(
 					'label' => \Froxlor\Frontend\UI::getLng('serversettings.le_froxlor_redirect'),
@@ -44,7 +57,7 @@ return array(
 					'visible' => \Froxlor\Settings::Get('system.use_ssl') && call_user_func(array(
 						'\Froxlor\Settings\FroxlorVhostSettings',
 						'hasVhostContainerEnabled'
-					))
+					), true)
 				),
 				'system_hsts_maxage' => array(
 					'label' => \Froxlor\Frontend\UI::getLng('admin.domain_hsts_maxage'),
@@ -58,7 +71,7 @@ return array(
 					'visible' => \Froxlor\Settings::Get('system.use_ssl') && call_user_func(array(
 						'\Froxlor\Settings\FroxlorVhostSettings',
 						'hasVhostContainerEnabled'
-					))
+					), true)
 				),
 				'system_hsts_incsub' => array(
 					'label' => \Froxlor\Frontend\UI::getLng('admin.domain_hsts_incsub'),
@@ -70,7 +83,7 @@ return array(
 					'visible' => \Froxlor\Settings::Get('system.use_ssl') && call_user_func(array(
 						'\Froxlor\Settings\FroxlorVhostSettings',
 						'hasVhostContainerEnabled'
-					))
+					), true)
 				),
 				'system_hsts_preload' => array(
 					'label' => \Froxlor\Frontend\UI::getLng('admin.domain_hsts_preload'),
@@ -82,7 +95,7 @@ return array(
 					'visible' => \Froxlor\Settings::Get('system.use_ssl') && call_user_func(array(
 						'\Froxlor\Settings\FroxlorVhostSettings',
 						'hasVhostContainerEnabled'
-					))
+					), true)
 				),
 				/**
 				 * FCGID

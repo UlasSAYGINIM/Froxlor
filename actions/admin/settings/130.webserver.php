@@ -192,7 +192,7 @@ return array(
 					)
 				),
 				'system_errorlog_level' => array(
-					'label' => $lng['serversettings']['errorlog_level'],
+					'label' => \Froxlor\Frontend\UI::getLng('serversettings.errorlog_level'),
 					'settinggroup' => 'system',
 					'varname' => 'errorlog_level',
 					'type' => 'option',

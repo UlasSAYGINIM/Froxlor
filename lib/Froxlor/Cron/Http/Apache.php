@@ -149,7 +149,7 @@ class Apache extends HttpConfigBase
 			foreach ($statusCodes as $statusCode) {
 				if (Settings::Get('defaultwebsrverrhandler.err' . $statusCode) != '') {
 					$defhandler = Settings::Get('defaultwebsrverrhandler.err' . $statusCode);
-					if (! \Froxlor\Validate\Form\Data::validateUrl($defhandler)) {
+					if (! \Froxlor\Validate\Validate::validateUrl($defhandler)) {
 						if (substr($defhandler, 0, 1) != '"' && substr($defhandler, - 1, 1) != '"') {
 							$defhandler = '"' . \Froxlor\FileDir::makeCorrectFile($defhandler) . '"';
 						}
@@ -206,6 +206,21 @@ class Apache extends HttpConfigBase
 
 				if ($row_ipsandports['vhostcontainer_servername_statement'] == '1') {
 					$this->virtualhosts_data[$vhosts_filename] .= ' ServerName ' . Settings::Get('system.hostname') . "\n";
+
+					$froxlor_aliases = Settings::Get('system.froxloraliases');
+					if (!empty($froxlor_aliases)) {
+						$froxlor_aliases = explode(",", $froxlor_aliases);
+						$aliases = "";
+						foreach ($froxlor_aliases as $falias) {
+							if (\Froxlor\Validate\Validate::validateDomain(trim($falias))) {
+								$aliases .= trim($falias) . " ";
+							}
+						}
+						$aliases = trim($aliases);
+						if (!empty($aliases)) {
+							$this->virtualhosts_data[$vhosts_filename] .= ' ServerAlias ' . $aliases . "\n";
+						}
+					}
 				}
 
 				$is_redirect = false;
@@ -774,14 +789,14 @@ class Apache extends HttpConfigBase
 				'DOMAIN' => $domain['domain'],
 				'CUSTOMER' => $domain['loginname']
 			));
-			$logfiles_text .= '  ErrorLog "| ' . $command . "\"\n";
+			$logfiles_text .= '  ErrorLog "|' . $command . "\"\n";
 			// replace for access_log
 			$command = \Froxlor\PhpHelper::replaceVariables(Settings::Get('system.logfiles_script'), array(
 				'LOGFILE' => $access_log,
 				'DOMAIN' => $domain['domain'],
 				'CUSTOMER' => $domain['loginname']
 			));
-			$logfiles_text .= '  CustomLog "| ' . $command . '" ' . $logtype . "\n";
+			$logfiles_text .= '  CustomLog "|' . $command . '" ' . $logtype . "\n";
 		} else {
 			// Create the logfile if it does not exist (fixes #46)
 			touch($error_log);
@@ -1199,7 +1214,7 @@ class Apache extends HttpConfigBase
 				foreach ($statusCodes as $statusCode) {
 					if (isset($row_diroptions['error' . $statusCode . 'path']) && $row_diroptions['error' . $statusCode . 'path'] != '') {
 						$defhandler = $row_diroptions['error' . $statusCode . 'path'];
-						if (! \Froxlor\Validate\Form\Data::validateUrl($defhandler)) {
+						if (! \Froxlor\Validate\Validate::validateUrl($defhandler)) {
 							if (substr($defhandler, 0, 1) != '"' && substr($defhandler, - 1, 1) != '"') {
 								$defhandler = '"' . \Froxlor\FileDir::makeCorrectFile($defhandler) . '"';
 							}

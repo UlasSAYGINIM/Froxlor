@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <froxlor>
-	<distribution name="Debian" codename="Stretch"
-		version="9.x" defaulteditor="/bin/nano">
+	<distribution name="Ubuntu" codename="Bionic"
+		version="18.04" defaulteditor="/bin/nano">
 		<services>
 			<!-- HTTP -->
 			<service type="http" title="{{lng.admin.configfiles.http}}">
@@ -58,12 +58,23 @@
 					<command>
 						<visibility mode="true">{{settings.phpfpm.enabled}}
 						</visibility>
+						<content><![CDATA[apt-get install libapache2-mod-fastcgi]]></content>
+					</command>
+					<file name="/etc/apache2/mods-enabled/fastcgi.conf">
+						<visibility mode="true">{{settings.phpfpm.enabled}}
+						</visibility>
 						<content><![CDATA[
-# Please remember to activate the use of mod_proxy / mod_proxy_fcgi in the PHP-FPM settings!!!
-a2enmod proxy_fcgi
+<IfModule mod_fastcgi.c>
+    FastCgiIpcDir <FPM_IPCDIR>
+
+    <Location "/fastcgiphp">
+		Require all granted
+        Require env REDIRECT_STATUS
+    </Location>
+</IfModule>
 ]]>
 						</content>
-					</command>
+					</file>
 					<file name="{{settings.system.letsencryptacmeconf}}">
 						<visibility mode="true">{{settings.system.leenabled}}
 						</visibility>
@@ -4640,13 +4651,13 @@ aliases:     files
 					<install>
 						<visibility mode="equals" value="apache2">{{settings.system.webserver}}
 						</visibility>
-						<content><![CDATA[apt-get install apache2-suexec-pristine]]></content>
+						<content><![CDATA[apt-get install apache2-suexec-pristine libapache2-mod-fastcgi]]></content>
 					</install>
 					<install><![CDATA[apt-get install php-fpm]]></install>
 					<commands index="2">
 						<visibility mode="equals" value="apache2">{{settings.system.webserver}}
 						</visibility>
-						<command><![CDATA[a2enmod suexec proxy_fcgi actions]]></command>
+						<command><![CDATA[a2enmod suexec fastcgi actions]]></command>
 					</commands>
 					<commands index="3">
 						<visibility mode="true">{{settings.phpfpm.enabled_ownvhost}}

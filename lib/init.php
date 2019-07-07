@@ -16,15 +16,25 @@
  * @package    System
  *
  */
+
+// define default theme for configurehint, etc.
+$_deftheme = 'Sparkle';
+
+if (! file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
+	// get hint-template
+	$vendor_hint = file_get_contents(dirname(__DIR__) . '/templates/' . $_deftheme . '/misc/vendormissinghint.tpl');
+	// replace values
+	$vendor_hint = str_replace("<FROXLOR_INSTALL_DIR>", dirname(__DIR__), $vendor_hint);
+	$vendor_hint = str_replace("<CURRENT_YEAR>", date('Y', time()), $vendor_hint);
+	die($vendor_hint);
+}
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 session_start();
 
 use Froxlor\Database\Database;
 use Froxlor\Settings;
-
-// define default theme for configurehint, etc.
-$_deftheme = 'Sparkle';
 
 // check whether the userdata file exists
 if (! file_exists(\Froxlor\Froxlor::getInstallDir() . '/lib/userdata.inc.php')) {

@@ -11,6 +11,11 @@ if (file_exists('/etc/froxlor-test.pwd') && file_exists('/etc/froxlor-test.rpwd'
 	define('TRAVIS_CI', 1);
 }
 
+if (@php_sapi_name() !== 'cli') {
+	// not to be called via browser
+	die;
+}
+
 $userdata_content = "<?php
 \$sql['user'] = 'froxlor010';
 \$sql['password'] = '$pwd';
@@ -142,6 +147,8 @@ Settings::Set('system.defaultsslip', $defaultip, true);
 $sel_stmt = Database::prepare("SELECT * FROM `" . TABLE_PANEL_ADMINS . "` WHERE `adminid` = '1'");
 $admin_userdata = Database::pexecute_first($sel_stmt);
 $admin_userdata['adminsession'] = 1;
+
+$log = \Froxlor\FroxlorLogger::getInstanceOf($admin_userdata);
 
 Settings::Set('panel.standardlanguage', 'English', true);
 Settings::Set('panel.adminmail', 'admin@dev.froxlor.org', true);

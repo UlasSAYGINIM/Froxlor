@@ -56,7 +56,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function add()
 	{
@@ -331,7 +331,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function get()
 	{
@@ -441,7 +441,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function update()
 	{
@@ -560,7 +560,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 		}
 		// if using acme-v2 we cannot issue wildcard-certificates
 		// because they currently only support the dns-01 challenge
-		if ($iswildcarddomain == '0' && $letsencrypt == '1' && Settings::Get('system.leapiversion') == '2') {
+		if ($iswildcarddomain == '1' && $letsencrypt == '1' && Settings::Get('system.leapiversion') == '2') {
 			\Froxlor\UI\Response::standard_error('nowildcardwithletsencryptv2');
 		}
 
@@ -658,7 +658,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 	 *
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array count|list
+	 * @return string json-encoded array count|list
 	 */
 	public function listing()
 	{
@@ -735,7 +735,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function delete()
 	{
@@ -828,6 +828,8 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 		\Froxlor\System\Cronjob::inserttask('4');
 		// remove domains DNS from powerDNS if used, #581
 		\Froxlor\System\Cronjob::inserttask('11', $result['domain']);
+		// remove domain from acme.sh / lets encrypt if used
+		\Froxlor\System\Cronjob::inserttask('12', $result['domain']);
 
 		// reduce subdomain-usage-counter
 		Customers::decreaseUsage($customer['customerid'], 'subdomains_used');
@@ -852,7 +854,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 	{
 		// check whether an URL was specified
 		$_doredirect = false;
-		if (! empty($url) && \Froxlor\Validate\Form\Data::validateUrl($url)) {
+		if (! empty($url) && \Froxlor\Validate\Validate::validateUrl($url)) {
 			$path = $url;
 			$_doredirect = true;
 		} else {
@@ -860,7 +862,7 @@ class SubDomains extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\Resourc
 		}
 
 		// check whether path is a real path
-		if (! preg_match('/^https?\:\/\//', $path) || ! \Froxlor\Validate\Form\Data::validateUrl($path)) {
+		if (! preg_match('/^https?\:\/\//', $path) || ! \Froxlor\Validate\Validate::validateUrl($path)) {
 			if (strstr($path, ":") !== false) {
 				\Froxlor\UI\Response::standard_error('pathmaynotcontaincolon', '', true);
 			}

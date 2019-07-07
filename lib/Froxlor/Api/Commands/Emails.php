@@ -38,7 +38,7 @@ class Emails extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\ResourceEnt
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function add()
 	{
@@ -152,7 +152,7 @@ class Emails extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\ResourceEnt
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function get()
 	{
@@ -195,7 +195,7 @@ class Emails extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\ResourceEnt
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function update()
 	{
@@ -268,7 +268,7 @@ class Emails extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\ResourceEnt
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array count|list
+	 * @return string json-encoded array count|list
 	 */
 	public function listing()
 	{
@@ -308,7 +308,7 @@ class Emails extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\ResourceEnt
 	 *        	
 	 * @access admin, customer
 	 * @throws \Exception
-	 * @return array
+	 * @return string json-encoded array
 	 */
 	public function delete()
 	{
@@ -340,26 +340,12 @@ class Emails extends \Froxlor\Api\ApiCommand implements \Froxlor\Api\ResourceEnt
 		}
 		// check whether this address is an account
 		if ($result['popaccountid'] != 0) {
-			// Free the Quota used by the email account
-			if (Settings::Get('system.mail_quota_enabled') == 1) {
-				$stmt = Database::prepare("SELECT `quota` FROM `" . TABLE_MAIL_USERS . "` WHERE `customerid`= :customerid AND `id`= :id");
-				$res_quota = Database::pexecute_first($stmt, array(
-					"customerid" => $customer['customerid'],
-					"id" => $result['popaccountid']
-				), true, true);
-				Customers::decreaseUsage($customer['customerid'], 'email_quota_used', '', $res_quota['quota']);
-				Admins::decreaseUsage($customer['customerid'], 'email_quota_used', '', $res_quota['quota']);
-				$this->logger()->addInfo("[API] deleted quota entries for email address '" . $result['email_full'] . "'");
-			}
-			// delete account
-			$stmt = Database::prepare("DELETE FROM `" . TABLE_MAIL_USERS . "` WHERE `customerid`= :customerid AND `id`= :id");
-			Database::pexecute($stmt, array(
-				"customerid" => $customer['customerid'],
-				"id" => $result['popaccountid']
-			), true, true);
-			Customers::decreaseUsage($customer['customerid'], 'email_accounts_used');
-			Admins::decreaseUsage($customer['customerid'], 'email_accounts_used');
-			$this->logger()->addInfo("[API] deleted email account '" . $result['email_full'] . "'");
+			// use EmailAccounts.delete
+			$this->apiCall('EmailAccounts.delete', array(
+				'id' => $result['id'],
+				'customerid' => $customer['customerid'],
+				'delete_userfiles' => $delete_userfiles
+			));
 			$number_forwarders --;
 		}
 

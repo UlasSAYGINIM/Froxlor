@@ -661,6 +661,7 @@ class Login extends FeModule
 
 	public function resetpwd()
 	{
+		/*
 		$message = '';
 
 		// Remove old activation codes
@@ -748,5 +749,6 @@ class Login extends FeModule
 		} else {
 			\Froxlor\UI\Response::redirectTo('index.php');
 		}
+		*/
 	}
 }

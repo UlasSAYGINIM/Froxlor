@@ -19,7 +19,8 @@ use Froxlor\Install\Updates;
  */
 
 if (\Froxlor\Froxlor::isFroxlorVersion('0.9.40.1')) {
-	Updates::showUpdateStep("Updating from 0.9.40.1 to 0.10.0", false);
+
+	Updates::showUpdateStep("Updating from 0.9.40.1 to 0.10.0-rc1", false);
 
 	Updates::showUpdateStep("Adding new api keys table");
 	Database::query("DROP TABLE IF EXISTS `api_keys`;");
@@ -63,7 +64,7 @@ if (\Froxlor\Froxlor::isFroxlorVersion('0.9.40.1')) {
 	}
 	Updates::lastStepStatus(0);
 
-	\Froxlor\Froxlor::updateToVersion('0.10.0');
+	\Froxlor\Froxlor::updateToVersion('0.10.0-rc1');
 }
 
 if (\Froxlor\Froxlor::isDatabaseVersion('201809280')) {
@@ -185,6 +186,81 @@ if (\Froxlor\Froxlor::isDatabaseVersion('201812180')) {
 
 if (\Froxlor\Froxlor::isDatabaseVersion('201812190')) {
 
+	Updates::showUpdateStep("Adding new webserver error-log-level setting");
+	Settings::AddNew('system.errorlog_level', (\Froxlor\Settings::Get('system.webserver') == 'nginx' ? 'error' : 'warn'));
+	Updates::lastStepStatus(0);
+
+	\Froxlor\Froxlor::updateToDbVersion('201902120');
+}
+
+if (\Froxlor\Froxlor::isDatabaseVersion('201902120')) {
+
+	Updates::showUpdateStep("Adding new ECC / ECDSA setting for Let's Encrypt");
+	Settings::AddNew('system.leecc', '0');
+	$upd_stmt = Database::prepare("UPDATE `" . TABLE_PANEL_CRONRUNS . "` SET `cronclass`  = :cc WHERE `cronfile` = :cf");
+	Database::pexecute($upd_stmt, array(
+		'cc' => '\\Froxlor\\Cron\\Http\\LetsEncrypt\\AcmeSh',
+		'cf' => 'letsencrypt'
+	));
+	Settings::Set('system.letsencryptkeysize', '4096', true);
+	Updates::lastStepStatus(0);
+
+	Updates::showUpdateStep("Removing current Let's Encrypt certificates due to new implementation of acme.sh");
+	$sel_result = Database::query("SELECT id FROM `" . TABLE_PANEL_DOMAINS . "` WHERE `letsencrypt` = '1'");
+	$domain_ids = $sel_result->fetchAll(\PDO::FETCH_ASSOC);
+	if (count($domain_ids) > 0) {
+		$domain_in = "";
+		foreach ($domain_ids as $domain_id) {
+			$domain_in .= "'" . $domain_id['id'] . "',";
+		}
+		$domain_in = substr($domain_in, 0, - 1);
+		Database::query("DELETE FROM `" . TABLE_PANEL_DOMAIN_SSL_SETTINGS . "` WHERE `domainid` IN (" . $domain_in . ")");
+	}
+	Updates::lastStepStatus(0);
+
+	\Froxlor\Froxlor::updateToDbVersion('201902170');
+}
+
+if (\Froxlor\Froxlor::isDatabaseVersion('201902170')) {
+
+	Updates::showUpdateStep("Adding new froxlor vhost domain alias setting");
+	Settings::AddNew('system.froxloraliases', "");
+	Updates::lastStepStatus(0);
+
+	\Froxlor\Froxlor::updateToDbVersion('201902210');
+}
+
+if (\Froxlor\Froxlor::isDatabaseVersion('201902210')) {
+
+	// set correct version for people that have tested 0.10.0 before
+	\Froxlor\Froxlor::updateToVersion('0.10.0-rc1');
+	\Froxlor\Froxlor::updateToDbVersion('201904100');
+}
+
+if (\Froxlor\Froxlor::isDatabaseVersion('201904100')) {
+
+	Updates::showUpdateStep("Converting all MyISAM tables to InnoDB");
+	Database::needRoot(true);
+	Database::needSqlData();
+	$sql_data = Database::getSqlData();
+	$result = Database::query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '" . $sql_data['db'] . "' AND ENGINE = 'MyISAM'");
+	while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+		Database::query("ALTER TABLE `" . $row['TABLE_NAME'] . "` ENGINE=INNODB");
+	}
+	Updates::lastStepStatus(0);
+
+	\Froxlor\Froxlor::updateToDbVersion('201904250');
+}
+
+if (\Froxlor\Froxlor::isFroxlorVersion('0.10.0-rc1')) {
+	\Froxlor\Froxlor::updateToVersion('0.10.0-rc2');
+}
+
+/**
+ * fc branch testing
+ */
+if (false) {
+
 	Updates::showUpdateStep("Updating theme for all users");
 	\Froxlor\Settings::Set('panel.default_theme', 'Sparkle2', true);
 	$upd_stmt = Database::prepare("UPDATE `" . TABLE_PANEL_ADMINS . "` SET `theme` = :theme");
@@ -204,51 +280,7 @@ if (\Froxlor\Froxlor::isDatabaseVersion('201812190')) {
 	Database::query("DELETE FROM `" . TABLE_PANEL_SETTINGS . "` WHERE `settinggroup` = 'dkim' AND `varname`= 'dkim_add_adsppolicy';");
 	Updates::lastStepStatus(0);
 
-	\Froxlor\Froxlor::updateToDbVersion('201812300');
-}
-
-if (\Froxlor\Froxlor::isDatabaseVersion('201812300')) {
-
 	Updates::showUpdateStep("Removing unneeded settings");
 	Database::query("DELETE FROM `" . TABLE_PANEL_SETTINGS . "` WHERE `settinggroup` = 'system' AND `varname`= 'froxlordirectlyviahostname';");
 	Updates::lastStepStatus(0);
-
-	\Froxlor\Froxlor::updateToDbVersion('201901110');
-}
-
-if (\Froxlor\Froxlor::isDatabaseVersion('201901110')) {
-
-	showUpdateStep("Adding new webserver error-log-level setting");
-	Settings::AddNew('system.errorlog_level', (\Froxlor\Settings::Get('system.webserver') == 'nginx' ? 'error' : 'warn'));
-	lastStepStatus(0);
-
-	\Froxlor\Froxlor::updateToDbVersion('201902120');
-}
-
-if (\Froxlor\Froxlor::isDatabaseVersion('201902120')) {
-
-	showUpdateStep("Adding new ECC / ECDSA setting for Let's Encrypt");
-	Settings::AddNew('system.leecc', '0');
-	$upd_stmt = Database::prepare("UPDATE `" . TABLE_PANEL_CRONRUNS . "` SET `cronclass`  = :cc WHERE `cronfile` = :cf");
-	Database::pexecute($upd_stmt, array(
-		'cc' => '\\Froxlor\\Cron\\Http\\LetsEncrypt\\AcmeSh',
-		'cf' => 'letsencrypt'
-	));
-	Settings::Set('system.letsencryptkeysize', '4096', true);
-	lastStepStatus(0);
-
-	showUpdateStep("Removing current Let's Encrypt certificates due to new implementation of acme.sh");
-	$sel_result = Database::query("SELECT id FROM `" . TABLE_PANEL_DOMAINS . "` WHERE `letsencrypt` = '1'");
-	$domain_ids = $sel_result->fetchAll(\PDO::FETCH_ASSOC);
-	if (count($domain_ids) > 0) {
-		$domain_in = "";
-		foreach ($domain_ids as $domain_id) {
-			$domain_in .= "'" . $domain_id['id'] . "',";
-		}
-		$domain_in = substr($domain_in, 0, - 1);
-		Database::query("DELETE FROM `" . TABLE_PANEL_DOMAIN_SSL_SETTINGS . "` WHERE `domainid` IN (" . $domain_in . ")");
-	}
-	lastStepStatus(0);
-
-	\Froxlor\Froxlor::updateToDbVersion('201902170');
 }

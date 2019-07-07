@@ -1739,7 +1739,7 @@ $lng['admin']['configfiles']['legend'] = '<h3>You are about to configure a servi
 $lng['admin']['configfiles']['commands'] = '<span class="text-danger">Commands:</span> These commands are to be executed line by line as root-user in a shell. It is safe to copy the whole block and paste it into the shell.';
 $lng['admin']['configfiles']['files'] = '<span class="text-danger">Config files:</span> The commands before the textfields should open an editor with the target file. Just copy and paste the contents into the editor and save the file.<br><span class="text-danger">Please note:</span> The MySQL-password has not been replaced for security reasons. Please replace "FROXLOR_MYSQL_PASSWORD" on your own or use the javascript form below to replace it on-site. If you forgot your MySQL-password you\'ll find it in "lib/userdata.inc.php"';
 $lng['serversettings']['apache_itksupport']['title'] = 'Use modifications for Apache ITK-MPM';
-$lng['serversettings']['apache_itksupport']['description'] = '<strong class="text-danger">ATTENTION:</strong> use only if you acutally have apache itk-mpm enabled<br />otherwise your webserver will not be able to start';
+$lng['serversettings']['apache_itksupport']['description'] = '<strong class="text-danger">ATTENTION:</strong> use only if you actually have apache itk-mpm enabled<br />otherwise your webserver will not be able to start';
 $lng['integrity_check']['databaseCharset'] = 'Character set of database (should be UTF-8)';
 $lng['integrity_check']['domainIpTable'] = 'IP &lt;&dash;&gt; domain references';
 $lng['integrity_check']['subdomainSslRedirect'] = 'False SSL-redirect flag for non-ssl domains';
@@ -2057,8 +2057,11 @@ $lng['success']['wipecleartextmailpws'] = 'Successfully cleared all plaintext em
 $lng['panel']['security'] = 'Security';
 $lng['panel']['lookandfeel'] = 'Look and feel';
 $lng['tasks']['remove_pdns_domain'] = 'Delete domain %s from PowerDNS database';
+$lng['tasks']['remove_ssl_domain'] = 'Delete ssl files of domain %s';
 $lng['admin']['novhostcontainer'] = '<br><br><small class="red">None of the IPs and ports has the "' . $lng['admin']['ipsandports']['create_vhostcontainer'] . '" option enabled, many settings here will not be available</small>';
 $lng['serversettings']['errorlog_level']['title'] = 'Error log-level';
 $lng['serversettings']['errorlog_level']['description'] = 'Specify the error log level. Default is "warn" for apache-users and "error" for nginx-users.';
 $lng['serversettings']['letsencryptecc']['title'] = "Issue ECC / ECDSA certificate";
 $lng['serversettings']['letsencryptecc']['description'] = "If set to a valid key-size the certificate issued will use ECC / ECDSA";
+$lng['serversettings']['froxloraliases']['title'] = "Domain aliases for froxlor vhost";
+$lng['serversettings']['froxloraliases']['description'] = "Comma separated list of domains to add as server alias to the froxlor vhost";

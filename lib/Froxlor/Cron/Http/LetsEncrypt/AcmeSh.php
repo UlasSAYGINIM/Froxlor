@@ -173,6 +173,16 @@ class AcmeSh extends \Froxlor\Cron\FroxlorCron
 					$certrow['domain']
 				);
 
+				$froxlor_aliases = Settings::Get('system.froxloraliases');
+				if (!empty($froxlor_aliases)) {
+					$froxlor_aliases = explode(",", $froxlor_aliases);
+					foreach ($froxlor_aliases as $falias) {
+						if (\Froxlor\Validate\Validate::validateDomain(trim($falias))) {
+							$domains[] = trim($falias);
+						}
+					}
+				}
+
 				// Only renew let's encrypt certificate if no broken ssl_redirect is enabled
 				// - this temp. deactivation of the ssl-redirect is handled by the webserver-cronjob
 				if ($cert_mode == 'renew') {
@@ -262,7 +272,7 @@ class AcmeSh extends \Froxlor\Cron\FroxlorCron
 			$acmesh_cmd = self::$acmesh . " --auto-upgrade 0 --server " . self::$apiserver . " --" . $cert_mode . " -d " . implode(" -d ", $domains);
 
 			if ($cert_mode == 'issue') {
-				$acmesh_cmd .= " -w " . \Froxlor\Froxlor::getInstallDir();
+				$acmesh_cmd .= " -w " . Settings::Get('system.letsencryptchallengepath');
 			}
 			if (Settings::Get('system.leecc') > 0) {
 				$acmesh_cmd .= " --keylength ec-" . Settings::Get('system.leecc');
@@ -271,6 +281,9 @@ class AcmeSh extends \Froxlor\Cron\FroxlorCron
 			}
 			if (Settings::Get('system.letsencryptreuseold') != '1') {
 				$acmesh_cmd .= " --always-force-new-domain-key";
+			}
+			if (Settings::Get('system.letsencryptca') == 'testing') {
+				$acmesh_cmd .= " --staging";
 			}
 
 			$acme_result = \Froxlor\FileDir::safe_exec($acmesh_cmd);

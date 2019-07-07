@@ -140,13 +140,15 @@ class UI
 	{
 		// fallback
 		$theme = self::$default_theme;
-		if ((int) \Froxlor\Settings::Get('panel.db_version') >= 201812300) {
-			// system default
-			$theme = (\Froxlor\Settings::Get('panel.default_theme') !== null) ? \Froxlor\Settings::Get('panel.default_theme') : $theme;
-			// customer theme
-			if (\Froxlor\CurrentUser::hasSession() && \Froxlor\CurrentUser::getField('theme') != $theme) {
-				$theme = \Froxlor\CurrentUser::getField('theme');
-			}
+		// system default
+		$theme = (\Froxlor\Settings::Get('panel.default_theme') !== null) ? \Froxlor\Settings::Get('panel.default_theme') : $theme;
+		// customer theme
+		if (\Froxlor\CurrentUser::hasSession() && \Froxlor\CurrentUser::getField('theme') != $theme) {
+			$theme = \Froxlor\CurrentUser::getField('theme');
+		}
+		if (! file_exists(\Froxlor\Froxlor::getInstallDir() . '/templates/' . $theme)) {
+			\Froxlor\PhpHelper::phpErrHandler(E_USER_WARNING, "Theme '" . $theme . "' could not be found.", __FILE__, __LINE__, null);
+			$theme = self::$default_theme;
 		}
 		return $theme;
 	}
